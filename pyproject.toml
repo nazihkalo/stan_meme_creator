@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "stan-meme-creator"
+version = "0.1.0"
+description = ""
+authors = ["Nazih Kalo <nazih@phantom.app>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flask = "^3.0.2"
+pillow = "^10.2.0"
+streamlit-image-select = "^0.6.0"
+extra-streamlit-components = "^0.1.71"
+streamlit-extras = "^0.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
