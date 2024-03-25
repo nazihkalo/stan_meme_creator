@@ -35,19 +35,25 @@ twitter()
 # Iterate and add all paths in the image folder stan_meme_creator/static/meme_templates
 meme_folder = "stan_meme_creator/static/meme_templates"
 overlay_folder = "stan_meme_creator/static/overlay_templates"
+gif_folder = "stan_meme_creator/static/gif_templates"
 
 with st.expander("The first step is to select a meme template.", expanded=True):
 
     chosen_id = stx.tab_bar(data=[
         stx.TabBarItemData(id='meme', title="Meme", description="Memable images"),
         stx.TabBarItemData(id='overlay', title="Overlay", description="Simple overlay images"),
+        stx.TabBarItemData(id='gif', title="GIF", description="Animated images")
     ], default='meme')
 
 
     if chosen_id == 'meme':
         images = [os.path.join(meme_folder, filename) for filename in os.listdir(meme_folder)]
-    else:
+    elif chosen_id == 'overlay':
         images = [os.path.join(overlay_folder, filename) for filename in os.listdir(overlay_folder)]
+    elif chosen_id == 'gif':
+        images = [os.path.join(gif_folder, filename) for filename in os.listdir(gif_folder)]
+    else:
+        images = []
 
 
 
