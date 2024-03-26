@@ -10,6 +10,8 @@ from PIL import Image
 
 from streamlit_image_select import image_select
 import extra_streamlit_components as stx
+from streamlit_cropper import st_cropper
+st.set_option('deprecation.showfileUploaderEncoding', False)
 
 from links import twitter
 
@@ -76,11 +78,19 @@ with st.expander("The second step is to upload your own image.", expanded=True):
 
 """
 
+
 with st.expander("Finally enjoy & share:)", expanded = True):
 
     if uploaded_file:
         img = Image.open(uploaded_file)
         # st.image(img, caption="Uploaded image", use_column_width=True)
+        # Get a cropped image from the frontend
+        realtime_update = False 
+        box_color = '#0000FF'
+        enable_cropping = st.toggle("Crop Image", value=False)
+        if enable_cropping:
+            st.write("Double click to save crop")
+            img = st_cropper(img, realtime_update=realtime_update, box_color=box_color,)
         template_complete = process_image(img, template_img)
         st.image(template_complete, caption="Meme template with your image",   use_column_width=True)
         # Add share image to twitter with pre-filled text

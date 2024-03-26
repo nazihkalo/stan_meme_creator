@@ -13,6 +13,7 @@ streamlit-image-select = "^0.6.0"
 extra-streamlit-components = "^0.1.71"
 streamlit-extras = "^0.4.0"
 ipykernel = "^6.29.3"
+streamlit-cropper = "^0.2.2"
 
 
 [build-system]
