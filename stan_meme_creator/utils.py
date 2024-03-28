@@ -56,7 +56,7 @@ def process_gif_template(user_image, template_path, output_path, area):
         
         return gif_bytes_io
 
-def process_image(user_image, selected_template_path):
+def process_image(user_image, selected_template_path, maintain_aspect_ratio=False):
     if not os.path.exists(OUTPUT_FOLDER):
         os.makedirs(OUTPUT_FOLDER)
 
@@ -75,18 +75,43 @@ def process_image(user_image, selected_template_path):
         return gif_bytes_io
     else:
         # For non-GIF templates, use the existing insert_image function
-        template_complete = insert_image(user_image, selected_template_path, output_path, area)
+        template_complete = insert_image(user_image, selected_template_path, output_path, area, maintain_aspect_ratio)
         # template_complete.save(output_path)  # Make sure to save the result
         return template_complete
 
 
-def insert_image(user_image, template_path, output_path, area):
+def resize_image_to_fit_area(image, area_width, area_height, maintain_aspect_ratio=True):
+    """
+    Resize an image to fit into a specified area, optionally maintaining the aspect ratio.
+    """
+    if maintain_aspect_ratio:
+        # Calculate the target size to maintain the aspect ratio
+        img_width, img_height = image.size
+        target_width = area_width
+        target_height = int((img_height * area_width) / img_width)
+        
+        if target_height > area_height:
+            target_height = area_height
+            target_width = int((img_width * area_height) / img_height)
+        
+        # Resize the image to target size
+        image_resized = image.resize((target_width, target_height))
+        
+        # Create a new image with a transparent background and paste the resized image onto it
+        new_image = Image.new("RGBA", (area_width, area_height), (0, 0, 0, 0))
+        paste_position = ((area_width - target_width) // 2, (area_height - target_height) // 2)
+        new_image.paste(image_resized, paste_position)
+        return new_image
+    else:
+        # Directly resize the image to fill the area, changing its aspect ratio
+        return image.resize((area_width, area_height))
 
+def insert_image(user_image, template_path, output_path, area, maintain_aspect_ratio=True):
     with Image.open(template_path) as template:
         template = template.convert("RGBA")
         
-        # Resize the user image to fit the transparent area
-        user_image_resized = user_image.resize((area[4], area[5]))
+        # Resize the user image to fit the transparent area, with an option to maintain the aspect ratio
+        user_image_resized = resize_image_to_fit_area(user_image, area[4], area[5], maintain_aspect_ratio)
         
         # Create a new image for the base layer that matches the template size
         base_layer = Image.new("RGBA", template.size)
@@ -101,6 +126,29 @@ def insert_image(user_image, template_path, output_path, area):
         # base_layer.save(output_path, 'PNG')
         
         return base_layer
+
+
+# def insert_image(user_image, template_path, output_path, area):
+
+#     with Image.open(template_path) as template:
+#         template = template.convert("RGBA")
+        
+#         # Resize the user image to fit the transparent area
+#         user_image_resized = user_image.resize((area[4], area[5]))
+        
+#         # Create a new image for the base layer that matches the template size
+#         base_layer = Image.new("RGBA", template.size)
+        
+#         # Paste the resized user image onto the base layer at the specified area
+#         base_layer.paste(user_image_resized, (area[0], area[1]))
+        
+#         # Now paste the template onto the base layer, using the template's alpha channel as the mask
+#         base_layer.paste(template, (0, 0), template)
+        
+#         # Optionally, save the result if needed
+#         # base_layer.save(output_path, 'PNG')
+        
+#         return base_layer
 
 
 # def process_image(user_image, selected_template_path):

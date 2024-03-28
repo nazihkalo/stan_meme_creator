@@ -88,10 +88,11 @@ with st.expander("Finally enjoy & share:)", expanded = True):
         realtime_update = False 
         box_color = '#0000FF'
         enable_cropping = st.toggle("Crop Image", value=False)
+        maintain_aspect_ratio =  st.toggle("Maintain Aspect Ratio", value=False)
         if enable_cropping:
             st.write("Double click to save crop")
             img = st_cropper(img, realtime_update=realtime_update, box_color=box_color,)
-        template_complete = process_image(img, template_img)
+        template_complete = process_image(img, template_img, maintain_aspect_ratio=maintain_aspect_ratio)
         st.image(template_complete, caption="Meme template with your image",   use_column_width=True)
         # Add share image to twitter with pre-filled text
         
