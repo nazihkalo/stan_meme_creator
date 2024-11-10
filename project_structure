@@ -1,0 +1,16 @@
+stan_meme_creator/
+├── __init__.py
+├── core/
+│   ├── __init__.py
+│   ├── image_processor.py
+│   └── template_manager.py
+├── utils/
+│   ├── __init__.py
+│   ├── image_utils.py
+│   └── meme_utils.py
+├── pages/
+│   └── 1_🤖_AI_Meme_Generator.py
+├── data/
+│   └── meme_data.json
+├── config.py
+└── Home.py
