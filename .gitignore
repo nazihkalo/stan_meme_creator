@@ -5,3 +5,6 @@ stan_meme_creator/__pycache__/utils.cpython-310.pyc
 .env
 # Ignore all .pyc files
 **/*.pyc
+**/*.cpython-312.pyc
+
+stan_meme_creator/utils/__pycache__/meme_utils.cpython-312.pyc

@@ -28,9 +28,14 @@ if st.button("Generate Meme"):
     if user_input:
         with st.spinner("Generating your meme..."):
             # Find relevant image
-            image_url = meme_gen.find_relevant_image(user_input)
+            result = meme_gen.find_relevant_image(user_input)
             
-            if image_url:
+            if result:
+                image_url, image_id = result
+                
+                # Log the image ID (you can implement your preferred logging method)
+                st.write(f"Selected meme template ID: {image_id}")
+                
                 # Generate meme
                 meme_image = meme_gen.generate_meme(image_url, user_input)
                 
@@ -43,7 +48,7 @@ if st.button("Generate Meme"):
                 st.download_button(
                     label="Download Meme",
                     data=buf.getvalue(),
-                    file_name="generated_meme.png",
+                    file_name=f"generated_meme_{image_id}.png",
                     mime="image/png"
                 )
             else:
