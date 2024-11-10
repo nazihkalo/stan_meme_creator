@@ -2,3 +2,6 @@
 **/.DS_Store
 stan_meme_creator/static/.DS_Store
 stan_meme_creator/__pycache__/utils.cpython-310.pyc
+.env
+# Ignore all .pyc files
+**/*.pyc
