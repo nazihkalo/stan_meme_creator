@@ -9,6 +9,7 @@ from sentence_transformers import SentenceTransformer
 from textwrap import wrap
 import re
 from urllib.parse import unquote
+import base64
 
 class MemeGenerator:
     def __init__(self, data_path: str):
@@ -93,16 +94,22 @@ class MemeGenerator:
         Returns:
             Tuple of (font, wrapped_text_lines)
         """
-        target_height = img.height // 5  # Target height is 1/5 of image height
+        # Start with a larger base size - 1/8 of image height instead of 1/5
+        target_height = img.height // 8
         max_width = int(img.width * max_width_ratio)
         
-        # Start with a large size and scale down
-        size = target_height
-        while size > 0:
+        # Binary search for optimal font size
+        min_size = 10
+        max_size = target_height
+        optimal_font = None
+        optimal_wrapped_text = None
+        
+        while min_size <= max_size:
+            current_size = (min_size + max_size) // 2
             try:
-                font = ImageFont.truetype("arial.ttf", size)
+                font = ImageFont.truetype("arial.ttf", current_size)
             except:
-                font = ImageFont.load_default()
+                font = ImageFont.load_default(size=current_size)
                 
             # Calculate wrapped text
             avg_char_width = font.getlength('x')
@@ -114,16 +121,27 @@ class MemeGenerator:
             total_height = len(wrapped_text) * (font.size + 10)  # Add padding between lines
             
             if max_line_width <= max_width and total_height <= target_height * 2:
-                return font, wrapped_text
-                
-            size -= 1
+                optimal_font = font
+                optimal_wrapped_text = wrapped_text
+                min_size = current_size + 1  # Try larger size
+            else:
+                max_size = current_size - 1  # Try smaller size
         
-        # Fallback
-        return ImageFont.load_default(), wrap(text, width=30)
+        if optimal_font is None:
+            return ImageFont.load_default(), wrap(text, width=30)
+        
+        return optimal_font, optimal_wrapped_text
 
     @staticmethod
-    def generate_meme(image_url: str, text: str) -> Image.Image:
-        """Generate a meme by adding text to an image with dynamic sizing."""
+    def generate_meme(image_url: str, text: str, text_position: str = 'top') -> Image.Image:
+        """
+        Generate a meme by adding text to an image with dynamic sizing.
+        
+        Args:
+            image_url: URL of the image
+            text: Text to add to the image
+            text_position: Where to place the text ('top', 'bottom', or 'center')
+        """
         # Download image
         response = requests.get(image_url)
         img = Image.open(io.BytesIO(response.content))
@@ -139,12 +157,17 @@ class MemeGenerator:
         font, wrapped_text = MemeGenerator._calculate_font_size(img, text)
         
         # Calculate text positions
-        line_height = font.size + 10  # Add padding between lines
+        line_height = int(font.size * 1.2)  # Increased line spacing
         total_height = len(wrapped_text) * line_height
         
-        # Position text near top with padding
-        top_padding = img.height * 0.05  # 5% of image height
-        y = top_padding
+        # Position text based on text_position parameter
+        padding = img.height * 0.02  # 2% padding
+        if text_position == 'top':
+            y = padding
+        elif text_position == 'bottom':
+            y = img.height - total_height - padding
+        else:  # center
+            y = (img.height - total_height) / 2
         
         # Draw each line of text
         for line in wrapped_text:
@@ -154,8 +177,9 @@ class MemeGenerator:
             
             # Draw text outline
             outline_color = "black"
-            outline_width = max(1, font.size // 15)  # Scale outline with font size
+            outline_width = max(2, font.size // 12)
             
+            # Thicker outline for better visibility
             for dx in range(-outline_width, outline_width + 1):
                 for dy in range(-outline_width, outline_width + 1):
                     draw.text((x + dx, y + dy), line, font=font, fill=outline_color)
@@ -167,3 +191,57 @@ class MemeGenerator:
             y += line_height
         
         return img
+
+    def find_top_images(self, prompt: str, n: int = 9) -> List[Tuple[str, str, float]]:
+        # Encode the prompt and move to CPU immediately
+        prompt_embedding = self.model.encode(prompt, convert_to_tensor=True).cpu()
+        
+        # Calculate cosine similarities
+        similarities = [
+            float(prompt_embedding @ tag_embedding.cpu().T / 
+                 (np.linalg.norm(prompt_embedding.numpy()) * np.linalg.norm(tag_embedding.cpu().numpy())))
+            for tag_embedding in self.tag_embeddings
+        ]
+        
+        # Get indices of top N similarities
+        top_indices = np.argsort(similarities)[-n:][::-1]
+        
+        # Create result list
+        results = []
+        for idx in top_indices:
+            # if similarities[idx] >= 0.3:  # Keep similarity threshold
+            image_url = self.meme_data[idx]['images']
+            image_id = self._extract_image_id(image_url)
+            results.append((image_url, image_id, similarities[idx]))
+        
+        return results
+
+    @staticmethod
+    def prepare_meme_data(image_url: str) -> dict:
+        """
+        Prepare image data for the interactive editor without applying text.
+        
+        Args:
+            image_url: URL of the image
+            
+        Returns:
+            Dictionary with image data and dimensions
+        """
+        # Download image
+        response = requests.get(image_url)
+        img = Image.open(io.BytesIO(response.content))
+        
+        # Convert to RGBA if necessary
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+            
+        # Convert to base64 for frontend
+        buffered = io.BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        
+        return {
+            "image": img_str,
+            "width": img.width,
+            "height": img.height
+        }

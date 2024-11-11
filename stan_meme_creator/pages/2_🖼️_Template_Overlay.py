@@ -110,11 +110,11 @@ def display_twitter_button():
         """
         <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" 
            class="twitter-share-button" 
-           data-text="$STAN @StanleyCupCoin Meme Template Generator 🥤🏆" 
-           data-url="https://www.stanleyco.in"
+           data-text="$STAN @StanCupCoin Meme Template Generator 🥤🏆" 
+           data-url="https://www.stancupcoin.com"
            data-show-count="false"
            data-size="Large" 
-           data-hashtags="stan,stanleycupcoin">
+           data-hashtags="stan,stancupcoin">
            Tweet
         </a>
         <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
