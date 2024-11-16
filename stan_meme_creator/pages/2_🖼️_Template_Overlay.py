@@ -8,7 +8,6 @@ from streamlit_extras.stoggle import stoggle
 
 from core.image_processor import ImageProcessor
 from core.template_manager import TemplateManager
-from config import MEME_TEMPLATES_DIR, OVERLAY_TEMPLATES_DIR
 from utils.link_utils import twitter
 
 # Page configuration
