@@ -54,6 +54,10 @@ def select_template() -> str:
         images = (template_paths["meme_templates"] if chosen_id == 'meme' 
                  else template_paths["overlay_templates"])
 
+        if not images:
+            st.error("No template images found. Please check the static/meme_templates and static/overlay_templates directories.")
+            return None
+
         return image_select(
             label="Select a template",
             images=images,
@@ -69,6 +73,10 @@ def process_and_display_result(uploaded_file: str, template_img: str):
     with st.expander("Finally enjoy & share:)", expanded=True):
         if not uploaded_file:
             st.info("No image uploaded yet.")
+            return
+            
+        if not template_img:
+            st.error("Please select a template first.")
             return
 
         img = Image.open(uploaded_file)

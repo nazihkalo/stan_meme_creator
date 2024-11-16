@@ -1,15 +1,8 @@
 from pathlib import Path
 from typing import List, Dict
+import streamlit as st
 
-from pathlib import Path
-
-# Base paths
-ROOT_DIR = Path(__file__).parent
-STATIC_DIR = ROOT_DIR / "static"
-
-# Template directories
-MEME_TEMPLATES_DIR = STATIC_DIR / "meme_templates"
-OVERLAY_TEMPLATES_DIR = STATIC_DIR / "overlay_templates"
+from stan_meme_creator.config import MEME_TEMPLATES_DIR, OVERLAY_TEMPLATES_DIR
 
 class TemplateManager:
     """Manages template discovery and organization."""
@@ -22,9 +15,15 @@ class TemplateManager:
         Returns:
             Dictionary with template categories and their paths
         """
+        def safe_glob(directory: Path, pattern: str) -> List[str]:
+            if not directory.exists():
+                st.warning(f"Template directory not found: {directory}")
+                return []
+            return sorted(str(p) for p in directory.glob(pattern))
+
         return {
-            "meme_templates": sorted(str(p) for p in MEME_TEMPLATES_DIR.glob("*.png")),
-            "overlay_templates": sorted(str(p) for p in OVERLAY_TEMPLATES_DIR.glob("*.png"))
+            "meme_templates": safe_glob(MEME_TEMPLATES_DIR, "*.png"),
+            "overlay_templates": safe_glob(OVERLAY_TEMPLATES_DIR, "*.png")
         }
 
     @staticmethod

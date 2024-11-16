@@ -1,7 +1,28 @@
-# Python cache files
+# Standard Python ignores
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Explicitly include template files
+!stan_meme_creator/static/meme_templates/*.png
+!stan_meme_creator/static/overlay_templates/*.png
 
 # OS files
 .DS_Store
